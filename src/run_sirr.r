@@ -11,10 +11,6 @@ times <- seq(0, timesteps, by = 1)
 
 # Create a sinusoidal observed data with noise
 observed_I <- 2000 + 100 * sin(2 * pi * times / timesteps) + rnorm(length(times), mean = 50, sd = 5)
-# write observed data to disk
-#write.csv(observed_I, "observed_I.csv", row.names = FALSE)
-
-#observed_I <- read.csv("observed_I.csv")$x
 
 threshold <- 250 # Threshold for resampling
 
