@@ -61,7 +61,6 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
     healthy = TRUE
     # add a threshold to avoid degeneracy
     if (!adequate_ESS(weights, 250)) {
-      print(sum(weights^2))
       healthy = FALSE
       print("Degeneracy detected, resampling...")
       # find the particle closest to observed_I
@@ -73,8 +72,6 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
           min_index <- i
         }
       }
-      # Print the index of the closest particle, the particles I value and the observed I value
-      print(paste("min_index:", min_index, "particle I:", particles[[min_index]]["I"], "observed I:", observed_I[time + 1]))
 
       # Choose the particle closest to the observed data 
       weights[min_index] <- 1e3

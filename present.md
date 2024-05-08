@@ -4,20 +4,26 @@ author: Brian Lambert
 ---
 <!-- end_slide -->
 
-A talk about software carpentry
----
-How testing enables reproducibility, portability, agility, and collaboration
-Introduction slide
-<!-- end_slide -->
 
 Traditional Software Engineering
 ---
 # Programming
-
-# Debugging
 <!-- end_slide -->
 
 
+
+# An Unpleasant Truth
+---
+<!-- column_layout: [2, 1] -->
+<!-- column: 0 -->
+![](imgs/oppenheimer.webp)
+<!-- column: 1 -->
+_"By June 1949, people had begun to realize that it was not so easy to get a program right as had at one time appeared. It was on one of my journeys between the EDSAC room and the punching equipment that the realization came over me with full force that a good part of the remainder of my life was going to be spent in finding errors in my own programs."_
+ 
+ - Maurice Wilkes,
+ "Memoirs of a Computer Pioneer" (1985)
+<!-- end_slide -->
+<!-- reset_layout -->
 
 # Practical Taxonomy of Bugs
 ---
@@ -31,34 +37,6 @@ Traditional Software Engineering
  - Or produce incorrect results only under certain conditions
 
 <!-- end_slide -->
-
-
-<!-- column_layout: [2, 1] -->
-
-<!-- column: 0 -->
-
-![](imgs/oppenheimer.webp)
-
-<!-- column: 1 -->
-_"By June 1949, people had begun to realize that it was not so easy to get a program right as had at one time appeared. It was on one of my journeys between the EDSAC room and the punching equipment that the realization came over me with full force that a good part of the remainder of my life was going to be spent in finding errors in my own programs."_
- 
- - Maurice Wilkes, creator of the first stored-program computer, EDSAC
- "Memoirs of a Computer Pioneer" (1985)
-<!-- end_slide -->
-<!-- reset_layout -->
-
-# Low availability of code in ecology: A call for urgent action, Culina _et al_, 2020
----
-<!-- column_layout: [2, 1] -->
-<!-- column: 0 -->
-* Randomly selected 346 articles published between 2015 and 2019.
-* Only 21% could provide (partial) code.
-
-<!-- column: 1 -->
-![](imgs/ears.png)
-[Low availability of code in ecology: A call for urgent action, Culina et al, 2020](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000763)
-<!-- end_slide -->
-<!-- reset_layout -->
 
 
 # Debugging Commandments 
@@ -75,10 +53,12 @@ _"By June 1949, people had begun to realize that it was not so easy to get a pro
 
 <!-- end_slide -->
 
-> Everyone knows that debugging is twice as hard as writing a program in the first place. So if you're as clever as you can be when you write it, how will you ever debug it?" 
-— Kernighan, The Elements of Programming Style (1974)
-
+Traditional Software Engineering
+---
+# Programming
+# Debugging
 <!-- end_slide -->
+
 ![](imgs/re2.png)
 <!-- jump_to_middle -->
  [Software Carpentry](https://www.youtube.com/watch?v=8qzVV7eEiaI)
@@ -113,6 +93,19 @@ yeah and sorry but this is just the way it's going to be from now on
 <!-- end_slide -->
 
 
+# Low availability of code in ecology: A call for urgent action, Culina _et al_, 2020
+---
+<!-- column_layout: [2, 1] -->
+<!-- column: 0 -->
+* Randomly selected 346 articles published between 2015 and 2019.
+* Only 21% could provide (partial) code.
+
+<!-- column: 1 -->
+![](imgs/ears.png)
+[Low availability of code in ecology: A call for urgent action, Culina et al, 2020](https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000763)
+<!-- end_slide -->
+<!-- reset_layout -->
+
 Software development is now a routine part of being a professional scientist and even if you don't code yourself you're using software and you have a responsibility
 to understand how it works.
 <!-- pause -->
@@ -138,6 +131,26 @@ Version Control and testing are things that are becoming more common in the Scie
 <!-- end_slide -->
 
 
+Testing
+---
+# Unit Testing
+<!-- pause -->
+- Build infrastructure to automate debugging
+<!-- end_slide -->
+
+# Debugging Commandments 
+---
+- Reproduce with the smallest example. In the simplest environment.
+- Change one thing at a time.
+- Divide and conquer. 
+- Be open to debugging in different environments.
+- State your assumptions.
+- When in doubt, start with the most recent changes (especially dependencies changes).
+- Make sure the code you’re looking at is actually getting executed (deployed code, external dependencies, etc.)
+- Reduce the feedback loop — figure out the quickest way to test your debugging hypotheses.
+- Validate your inputs.
+
+<!-- end_slide -->
 
 Testing
 ---
@@ -171,26 +184,29 @@ Testing
 | tinytest| 	Yes| 		Open source
 <!-- end_slide -->
 
-Function reference
-Expectations
+# What does a Testing Framework provide?
+---
+- A set of test / expect functions
+- A way to run tests
+- A way to report test results
+<!-- end_slide -->
 
-Objects
+# Testthat Expectation Functions (Selected)
+---
 ### expect_equal() expect_identical()
 - _Does code return the expected value?_
-### expect_type() expect_s3_class() expect_s4_class()
-- _Does code return an object inheriting from the expected base type, S3 class, or S4 class?_
 
-Vectors
-expect_length()
-Does code return a vector with the specified length?
-expect_lt() expect_lte() expect_gt() expect_gte()
-Does code return a number greater/less than the expected value?
-expect_setequal() expect_contains() expect_in()
-Does code return a vector containing the expected values?
-expect_true() expect_false()
-expect_vector()
-Does code return a vector with the expected size and/or prototype?
+### expect_length()
+- _Does code return a vector with the specified length?_
 
+### expect_lt() expect_lte() expect_gt() expect_gte()
+- _Does code return a number greater/less than the expected value?_
+
+### expect_contains() expect_in()
+- _Does code return a vector containing the expected values?_
+
+### expect_true() expect_false()
+- _Does code return expected logical values?_
 
 <!-- end_slide -->
 Unit Testing
@@ -229,7 +245,7 @@ test_that("roll_die returns values between 1 and 6", {
   expect_true(all(rolls >= 1 & rolls <= 6))
 })
 
-test_that("multiplerolls returns the expected distribution", {
+test_that("multiple rolls return the expected distribution", {
   num_rolls <- 10000
   num_dice <- 3
   expected_mean <- num_dice * 3.5
@@ -239,8 +255,6 @@ test_that("multiplerolls returns the expected distribution", {
   expect_equal(sd(rolls), expected_sd, tolerance = 0.1)
 })
 ```
-
-<!-- end_slide -->
 
 <!-- end_slide -->
 Testthat
@@ -258,17 +272,35 @@ Testthat
 Rscript --vanilla -e "testthat::test_file(\"dice/testthat_dice_roll_simulation.R\")"
 ```
 
-
 <!-- end_slide -->
-
-> Unimpressed-Face.gif
-
+# Congratulations! 
 <!-- end_slide -->
-
-# Now, a "War Story"
+<!-- newline -->
+<!-- newline -->
+# Unimpressed-Face.gif
 ---
+![](imgs/tenor.gif)
+<!-- end_slide -->
+# Why test things that I believe should already work or _always_ be true?
+<!-- end_slide -->
+
+# So now, a "War Story"
 
 <!-- end_slide -->
+
+```bash +exec
+Rcript --no-save -e "?sample()"
+```
+<!-- end_slide -->
+
+# Let's look at the random.c R source
+---
+[](https://github.com/wch/r-source/blob/trunk/src/main/random.c#L461)
+
+<!-- end_slide -->
+# Now fix the code
+<!-- end_slide -->
+
 Testthat
 ---
 ```bash +exec
@@ -289,30 +321,6 @@ Testthat
 Rscript --vanilla -e "testthat::test_file(\"src/testthat_sirr.r\")"
 ```
 
-
-
-<!-- end_slide -->
-
-- Coding Best Practices
-- Trad Software Development
-- Programming, Debugging (thats it)
-- this may be what your process looks like
-
-- Software Carpentry
-- McElreath, quotes, motivation
-
-- McElreath essential tools: version control, unit testing, documentation, continuous integration
-- But he doesn't actually teach these things
-
-- I will talk about unit testing and Docker, which is increasingly part of continuous integration
-
-- Debugging, how do you do this?  Smallest replicable example
-
-- Unit Testing is building infrastructure to automate debugging
-- You don't want to manually execute your code in rstudio, why manually debug it?
-
-
-- Docker is building infrastructure to automate deployment
 
 <!-- end_slide -->
 Continuous Integration
@@ -339,14 +347,52 @@ Continuous Integration
   - Collaboration
 <!-- end_slide -->
 
+# Dockerfile
+---
+```Dockerfile
+# Use an official R base image
+FROM r-base:latest
 
+# Set the working directory in the container
+WORKDIR /usr/src/app
 
+# Copy the current directory contents into the container at /usr/src/app
+COPY src/ .
+
+# Run commands to set USER_ENV variable
+RUN user=$(whoami) && \
+    echo "USER_ENV=$user" > /etc/environment
+
+# Install R packages as root
+RUN Rscript -e 'install.packages(c("testthat", "deSolve", "stats"), repos="http://cran.rstudio.com/", lib="/usr/local/lib/R/site-library")'
+
+# Make sure run_commands.sh is executable
+RUN chmod +x run_commands.sh
+
+# Run run_commands.sh when the container launches
+CMD ["./run_commands.sh"]
+
+``````
+<!-- end_slide -->
+
+```shell
+
+#!/bin/bash
+
+# Run the unit tests
+Rscript testthat_sirr.r
+
+# Check if the previous command was successful
+if [ $? -eq 0 ]; then
+    echo "Tests passed, running main script."
+    Rscript run_sirr.r
+else
+    echo "Tests failed, not running main script."
+fi
+```
 
 
 <!-- end_slide -->
-https://hub.docker.com/repository/docker/bwlambert/sir_example/general
-<!-- end_slide -->
-
 
 
 # Docker build and run
@@ -354,7 +400,39 @@ https://hub.docker.com/repository/docker/bwlambert/sir_example/general
 ```shell
 docker build -t "sir_example" .
 ```
+
+```shell 
+docker run sir_example
+```
+
+<!-- end_slide -->
+# Push to Docker Hub 
+---
+```shell
+docker login
+```
+```shell
+docker tag sir_example bwlambert/sir_example:latest
+```
+```shell
+docker push bwlambert/sir_example:latest
+```
 <!-- end_slide -->
 
 
+https://hub.docker.com/repository/docker/bwlambert/sir_example/general
+<!-- end_slide -->
 
+
+# Pull from Docker Hub 
+---
+```shell
+docker login
+```
+```shell
+docker pull bwlambert/sir_example:latest
+```
+```shell
+docker run bwlambert/sir_example
+```
+<!-- end_slide -->
