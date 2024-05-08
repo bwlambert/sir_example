@@ -66,15 +66,7 @@ test_that("Handling degeneracy reweights and samples appropriately", {
 
   time <- 2
  
-  #print("Unique weights before reweighing")
-  #print(length(unique(weights)))
-  #print("Weights before reweighing")
-  #print(weights)
   new_weights <- reweigh_in_case_of_degeneracy(weights, particles, observed_I, time, 5000)
-  #print("Unique weights after reweighing")
-  #print(length(unique(new_weights)))
-  #print("New weights")
-  #print(new_weights)
 
   # Check if the first weight is set high
   expect_true(new_weights[1] == 1e+3)
@@ -91,7 +83,6 @@ test_that("Handling degeneracy reweights and samples appropriately", {
   # print unique new particles
   print("Unique new particles")
   print(unique(new_particles))
-  print(length(unique(new_particles)))
   expect_length(unique(new_particles), 1) # Will often succeed!
 
   # save a list of length of unique particles from 10 calls:

@@ -14,13 +14,12 @@ sir_model <- function(t, state, parameters) {
 adequate_ESS <- function(weights,threshold) {
   # weights are assumed to be normalized
   ess = 1 / sum(weights^2)
-  print(paste("ESS:", ess))
-  print(paste("threshold:", threshold))
+  #print(paste("ESS:", ess))
+  #print(paste("threshold:", threshold))
   return(ess > threshold)
 }
 
 reweigh_in_case_of_degeneracy <- function(weights, particles, observed_I, time,threshold) {
-  print(threshold)
   # if no particles have weight -- choose the one closest to the data
   healthy = TRUE
   # add a threshold to avoid degeneracy
@@ -37,12 +36,11 @@ reweigh_in_case_of_degeneracy <- function(weights, particles, observed_I, time,t
         min_index <- i
       }
     }
-    # set all weights to 0 except for the chosen particle
-    weights <- rep(0, length(weights))
+    # SPOILER # set all weights to 0 except for the chosen particle
+    # weights <- rep(0, length(weights))
     # Choose the particle closest to the observed data 
     weights[min_index] <- 1e3
   }
-  print(sum(weights))
   #return(list(weights, particles))
   return(weights)
 }
@@ -56,7 +54,6 @@ sample_particles <- function(weights, particles) {
 # Particle filter function for SIR model
 #run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, times, num_particles = 1000, threshold = 250) {
 run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, times, num_particles, threshold) {
-  print(threshold)
   parameters <- c(beta = beta, gamma = gamma)
 
   particles <- replicate(num_particles, initial_state, simplify = FALSE)
@@ -92,7 +89,6 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
     # Normalize weights
     weights <- adjusted_weights / sum_weights
 
-
     print(paste("Time:", time))
     healthy = TRUE
     if (!adequate_ESS(weights, threshold)) {
@@ -100,20 +96,15 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
       weights <- reweigh_in_case_of_degeneracy(weights, particles, observed_I, time, threshold)
     }
 
-
     # Resample particles based on weights
-    #indices <- sample(seq_along(particles), size = num_particles, replace = TRUE, prob = weights)
     indices <- sample_particles(weights, particles)
-
 
     if (!healthy) {
       # print the number of unique particles 
-      #print(paste("Number of unique particles:", length(unique(indices))))
+      print(paste("Number of unique particles:", length(unique(indices))))
     }
 
-
     particles <- particles[indices]
-    weights <- rep(1 / num_particles, num_particles)
   }
 
   # Run particle filter over time
@@ -123,10 +114,3 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
 
   return(list(particles = particles, neg_log_likelihood = neg_log_likelihood))
 }
-
-
-
-##      # if no particles have weight -- choose the one closest to the data
-## if(!is.na(data[i]) & length(unique(smp.wt))==1){
-##     smp.wt[which.min(abs(params[3]*apply(states[i,2,,],2,sum) - data[i]))] <- 1e3*smp.wt[which.min(abs(params[3]*apply(states[i,2,,],2,sum) - data[i]))]
-## }

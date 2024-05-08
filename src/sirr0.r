@@ -15,47 +15,9 @@ sir_model <- function(t, state, parameters) {
 adequate_ESS <- function(weights,threshold) {
   # weights are assumed to be normalized
   ess = 1 / sum(weights^2)
-  print(paste("ESS:", ess))
+  #print(paste("ESS:", ess))
   return(ess > threshold)
 }
-
-resample_in_case_of_degeneracy <- function(weights, particles, observed_I, time) {
-  # if no particles have weight -- choose the one closest to the data
-    healthy = TRUE
-    # add a threshold to avoid degeneracy
-    if (!adequate_ESS(weights, 250)) {
-      print(sum(weights^2))
-      healthy = FALSE
-      print("Degeneracy detected, resampling...")
-      # find the particle closest to observed_I
-      min_diff <- Inf
-      for (i in seq_along(particles)) {
-        diff <- abs(particles[[i]]["I"] - observed_I[time + 1])
-        if (diff < min_diff) {
-          min_diff <- diff
-          min_index <- i
-        }
-      }
-      # Print the index of the closest particle, the particles I value and the observed I value
-      print(paste("min_index:", min_index, "particle I:", particles[[min_index]]["I"], "observed I:", observed_I[time + 1]))
-      # print mean of particles I
-      # print(paste("mean of particles I:", mean(sapply(particles, function(x) x["I"])))
-
-      # replace all particles with the closest one (Corrected from the original code)
-      #indices <- rep(min_index, num_particles)
-
-      # set the weight of the closest particle to 1 (This also corrects)
-      #weights <- rep(0, num_particles)
-
-      #weights <- rep(0.0001, num_particles)
-
-      # Choose the particle closest to the observed data 
-      weights[min_index] <- 1e3
-    }
-  #return(list(weights, particles))
-  return(weights)
-}
-
 
 # Particle filter function for SEIR model
 run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, times, num_particles = 1000) {
@@ -95,65 +57,37 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
     # Normalize weights
     weights <- adjusted_weights / sum_weights
     
-    #print(weights)
-
-    ##      # if no particles have weight -- choose the one closest to the data
-    ## if(!is.na(data[i]) & length(unique(smp.wt))==1){
-    ##     smp.wt[which.min(abs(params[3]*apply(states[i,2,,],2,sum) - data[i]))] <- 1e3*smp.wt[which.min(abs(params[3]*apply(states[i,2,,],2,sum) - data[i]))]
-    ## }
-    
     print(paste("Time:", time))
     healthy = TRUE
+    # add a threshold to avoid degeneracy
     if (!adequate_ESS(weights, 250)) {
+      print(sum(weights^2))
       healthy = FALSE
+      print("Degeneracy detected, resampling...")
+      # find the particle closest to observed_I
+      min_diff <- Inf
+      for (i in seq_along(particles)) {
+        diff <- abs(particles[[i]]["I"] - observed_I[time + 1])
+        if (diff < min_diff) {
+          min_diff <- diff
+          min_index <- i
+        }
+      }
+      # Print the index of the closest particle, the particles I value and the observed I value
+      print(paste("min_index:", min_index, "particle I:", particles[[min_index]]["I"], "observed I:", observed_I[time + 1]))
+
+      # Choose the particle closest to the observed data 
+      weights[min_index] <- 1e3
     }
-  #  # add a threshold to avoid degeneracy
-  #  if (!adequate_ESS(weights, 250)) {
-  #    print(sum(weights^2))
-  #    healthy = FALSE
-  #    print("Degeneracy detected, resampling...")
-  #    # find the particle closest to observed_I
-  #    min_diff <- Inf
-  #    for (i in seq_along(particles)) {
-  #      diff <- abs(particles[[i]]["I"] - observed_I[time + 1])
-  #      if (diff < min_diff) {
-  #        min_diff <- diff
-  #        min_index <- i
-  #      }
-  #    }
-  #    # Print the index of the closest particle, the particles I value and the observed I value
-  #    print(paste("min_index:", min_index, "particle I:", particles[[min_index]]["I"], "observed I:", observed_I[time + 1]))
-  #    # print mean of particles I
-  #    # print(paste("mean of particles I:", mean(sapply(particles, function(x) x["I"])))
 
-  #    # replace all particles with the closest one (Corrected from the original code)
-  #    #indices <- rep(min_index, num_particles)
-
-  #    # set the weight of the closest particle to 1 (This also corrects)
-  #    #weights <- rep(0, num_particles)
-
-  #    #weights <- rep(0.0001, num_particles)
-
-  #    # Choose the particle closest to the observed data 
-  #    weights[min_index] <- 1e3
-  #  }
-
-    weights <- resample_in_case_of_degeneracy(weights, particles, observed_I, time)
-
-    #write_particles_to_disk(particles, paste0("particles",time,".csv"))
     # Resample particles based on weights
     indices <- sample(seq_along(particles), size = num_particles, replace = TRUE, prob = weights)
 
     if (!healthy) {
-      print(paste("Number of unique weights:", length(unique(weights))))
-      #print(unique(weights))
-      # print the number of unique particles 
       print(paste("Number of unique particles:", length(unique(indices))))
     }
-    
 
     particles <- particles[indices]
-    weights <- rep(1 / num_particles, num_particles)
   }
   
   # Run particle filter over time
@@ -165,31 +99,27 @@ run_particle_filter <- function(beta,  gamma, observed_I, N, initial_state, time
 }
 
 
+
 ## Example usage
 beta <- 0.3
 sigma <- 1 / 5.2
 gamma <- 1 / 18
-initial_state <- c(S = 1000000, E = 1, I = 2500, R = 0)
 
 timesteps <- 20
 times <- seq(0, timesteps, by = 1)  
-#observed_I <- rnorm(length(times), mean = 20, sd = 5)  # Simulated observed infected cases
 
 # Create a sinusoidal observed data with noise
-#observed_I <- 2000 + 100 * sin(2 * pi * times / timesteps) + rnorm(length(times), mean = 0, sd = 5)
-# write observed data to disk
-#write.csv(observed_I, "observed_I.csv", row.names = FALSE)
-
-observed_I <- read.csv("observed_I.csv")$x
+observed_I <- 2000 + 100 * sin(2 * pi * times / timesteps) + rnorm(length(times), mean = 50, sd = 5)
 
 N <- 10000000  # Total population
 # Define the initial states and parameters
-initial_state <- c(S = (1000000-1500), I = 1500, R = 0)  # Adjusted initial conditions
+initial_state <- c(S = (N-1500), I = 1500, R = 0)  # Adjusted initial conditions
 parameters <- c(beta = 0.3, gamma = 1/14)   # Removed sigma, as it's not used in SIR
-
+number_of_particles <- 1000
 
 results <- run_particle_filter(beta, gamma, observed_I, N, initial_state, times)
-print(results$neg_log_likelihood)
+print(paste0("Negative log likelihood:", results$neg_log_likelihood))
+
 
 
 
